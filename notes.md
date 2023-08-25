@@ -210,4 +210,173 @@ https://developer.apple.com/develop/
 @@09
 O que aprendemos?
 
-Nesta aula, aprendemos que, através do File Manager, podemos fazer com que persistam diversos tipos de arquivos. No nosso caso, aprendemos a salvar a imagem de perfil do usuário da tela de consulta de registros de pon
+Nesta aula, aprendemos que, através do File Manager, podemos fazer com que persistam diversos tipos de arquivos. No nosso caso, aprendemos a salvar a imagem de perfil do usuário da tela de consulta de registros de pontos.
+
+#### 25/08/2023
+
+@02-Autenticação local
+
+@@01
+Projeto da aula anterior
+
+Se você deseja começar o curso a partir desta aula, pode fazer o download do projeto desenvolvido até o momento.
+
+https://github.com/alura-cursos/2316-alura-ponto-parte2/archive/2594825faccfb0ee10cf06469deee38f3e91df65.zip
+
+@@02
+Autenticação local
+
+[00:00] O próximo recurso que nós vamos começar a estudar é o de autenticação local. É muito comum hoje em dia, nós vemos em apps de banco principalmente, ou algum aplicativo que peça alguma informação sensível, você precisar autenticar a sua biometria, ou o seu face id com o iPhone, para você conseguir utilizar algum recurso.
+[00:27] No caso de aplicativos de banco, para você acessar a sua conta, enfim, esse é um recurso que está cada vez mais sendo utilizado, então é muito importante sabermos utilizar essa biblioteca também. No nosso caso, nós temos o nosso app de ponto, eu vou buildar ele de novo aqui. A ideia do aplicativo é registrar alguns pontos de horário de trabalho dos funcionários.
+
+[01:00] Nós temos aqui, por exemplo, uma lista com alguns recibos de ponto. Nós vamos utilizar esse recibo para implementarmos esse recurso de autenticação. A ideia é não deixar qualquer pessoa que pegue o seu celular conseguir deletar um recibo, então vamos pedir autorização do usuário quando clicarmos em deletar um recibo.
+
+[01:24] Hoje nós podemos vir na lista, clicar e deletar um recibo. A ideia é bloquearmos esse acesso de qualquer pessoa conseguir realizar essa ação. Vamos lá, para começar, vamos no "ReciboViewController", nós temos aqui um método onde nós deletamos um recibo, que é esse método delegate aqui.
+
+[01:49] E nós temos essas duas linhas, que já funcionam muito bem e conseguimos deletar o recibo. A ideia é colocarmos aqui uma validação de autenticação do usuário, para isso vamos utilizar o framework chamado local authenticator, é ele que nos dará acesso a essa funcionalidade do iPhone ou iPad.
+
+[02:15] Vamos lá, para começar, eu vou criar um gerenciador de autenticação, let authenticatorContext =, que é do tipo = LAContext. Nós não temos acesso a esse LAContext porque precisamos importar esse framework. Nas versões mais novas do Xcode ele já é importado automaticamente, import LocalAuthentication.
+
+[02:53] Vamos voltar ao código e utilizar esse = LAContext(), LA de local authentication. Com isso, o que vamos fazer? Assim como a maioria dos recursos que nós estamos utilizando, nós precisamos verificar se existe essa disponibilidade de uso desse recurso. Se você for pegar, por exemplo, iPhones mais antigos, bem mais antigos, não tinha esse recurso de autenticação.
+
+[03:28] Hoje em dia já é muito comum todos os iPhones que nós vemos já virem com esse recurso, mas sempre é interessante realizarmos essa validação para ver se existe esse recurso disponível. Como faremos isso? Eu vou fazer aqui um if desse authentication context, e temos esse método, if authenticationContext.canEvaluatePolicy().
+
+[03:53] Ele pede que passemos dois parâmetros, um erro e um tipo de autenticação que nós queremos. Podemos, por exemplo, pedir a autenticação somente com a biometria ou biometria e o face id. É exatamente esta que vamos pedir. Como é um enum, se eu apertar o ponto ele já me traz duas opções, eu quero a autenticação com biometria, (.deviceOwnerAuthenticationWithBiometrics, error:.
+
+[04:24] Aqui nós podemos passar um erro qualquer. Esse NSErrorPointer, na verdade, é um erro, mas precisamos passar um parâmetro do tipo in out, que é um parâmetro que conseguimos mudar alguma coisa quando recebemos por parâmetro. Por exemplo, aqui por default, todos os métodos que pedimos algum parâmetro, ele vem como constante, então se tentarmos mudar o valor desse parâmetro dentro do método, não conseguimos.
+
+[05:04] Se mudamos para in out, inout, dessa forma aqui, nós conseguimos alterar as configurações ou as propriedades do que estamos recebendo por parâmetro e utilizar isso. Eu falei tudo isso porque precisamos criar um erro, que é do tipo let error: NSError?, opcional. Aqui tem que ser um var error: NSError?, porque vamos passar ele por parâmetro.
+
+[05:37] Só que se passarmos ele assim, error comum, ele vai dar erro, então "Command + V", ele não vai deixar passar dessa maneira, nós precisamos colocar &error. Passando o parâmetro dessa forma, o método consegue alterar alguma propriedade dessa variável na implementação do método, por isso passamos com o "&".
+
+[06:04] Feita a validação, podemos utilizar, de fato, essa biblioteca. Ela é bem simples de utilizar, vamos chamar o nosso authenticationContext., ele tem esse método .evaluatePolicy(). Mais uma vez, precisamos passar que queremos utilizar a biometria e o face id. Podemos colocar uma mensagem quando exibirmos aquela tela de bloqueio, para o usuário entender o porquê ele está autenticando.
+
+[06:40] Por exemplo, "É necessário autenticação para apagar um recibo". Essa é a mensagem que vamos passar. O próximo parâmetro que nós temos aqui, na verdade é uma closure, como um bloco de sucesso ou erro. Só para ficar mais bonito aqui, eu vou apagar e eu vou fazer o seguinte, eu vou pegar o parâmetro de sucesso, o parâmetro de erro, e nós vamos então utilizar uma closure.
+
+[07:35] Dentro, se ele entrar nesse bloco, significa que já temos uma resposta, pode ser sucesso ou erro. Vamos verificar, se for sucesso, então if sucesso {}, vamos de fato apagar o recibo. Vou passar a implementação do deletar o recibo aqui para cima.
+
+[08:00] Aqui ele está reclamando porque nós estamos dentro de uma closure, então temos que colocar o self?. E aqui estamos utilizando o contexto, que é essa variável contexto. Mas o problema é que estamos utilizando aqui o self como opcional, pode ser que exista contexto ou não. Nós teremos que fazer mais uma verificação aqui, if let contexto = self?.contexto {}, se existir o contexto, nós vamos apagar o recibo dessa maneira, recibo.deletar(contexto).
+
+[08:45] A única coisa que temos que tomar cuidado aqui é porque como ele está voltando da closure, nós precisamos chamar esse método de deletar na tred principal. Eu vou chamar esse método DispatchQueue.main.async e eu vou passar toda essa implementação para dentro dele.
+
+[09:13] Então, essa é a implementação que precisamos para apagar um recibo. O que eu vou fazer? Eu vou gerar um build e nós tentaremos utilizar esse recurso, vamos ver se vai funcionar ou se vai faltar alguma coisa. Vamos no nosso simular, vou em "Recibos", vou clicar em apagar e não aconteceu nada.
+
+[09:42] Vamos ver o que está acontecendo no código. Vou colocar o breakpoint, ele parou aqui e ele está saindo fora. Essa parte do código serve para verificarmos se tem o recurso disponível.
+
+[10:00] Como estamos utilizando o simulador, nós vamos utilizar um recurso do próprio simulador para realizar esse teste, nós conseguimos fazer isso no simulador. Vou em "Features", tem o "Face ID", primeiro eu vou clicar nessa opção "Enrolled". No simulador, vou clicar mais uma vez em apagar o recibo e temos um crash.
+
+[10:24] Isso é muito importante para entendermos qual é o erro. Se viermos no console, ele indica que precisamos utilizar o nosso "info.plist" para pedir a permissão do usuário para utilizar esse recurso. Parece que já passamos por isso antes, quando fomos utilizar a câmera, quando fomos utilizar a biblioteca de fotos.
+
+[10:47] Vários recursos que temos disponíveis no iPhone nós precisamos da autorização do usuário, e esse é um deles. Então, antes de utilizarmos, o que vamos fazer? Pausei a execução, vou ao arquivo "Info.plist", e vamos adicionar essa permissão, vamos pedir a permissão do usuário.
+
+[11:12] Vou adicionar uma nova entrada. O que vamos digitar aqui? Eu vou começar digitando "privacy" e ele vai me trazer uma lista de coisas: bluetooth, calendário, câmera, tem várias coisas. Nós precisamos utilizar essa, a "Privacy - Face ID Usage Description", é essa a entrada que nós precisamos.
+
+[11:39] Vou dar um clique nela. O que vamos fazer aqui? Vamos colocar também uma mensagem: "É necessário utilizar a autenticação para ter acesso às configurações". Vou rodar mais uma vez o nosso simulador, vou voltar no nosso código. Cliquei em "Recibos" no simulador, cliquei no "X".
+
+[12:22] Olha que interessante, ele pergunta se você autoriza o Alura Ponto a utilizar o face id, e aparece a mensagem que nós colocamos no "Info.plist": "É necessário utilizar a autenticação para ter acesso às configurações". Vou dar um "Ok". Nós já temos a autorização do usuário. Agora ele entrou nessa tela, simulando o uso do face id.
+
+[12:47] Como eu autorizo isso? Vou em "Features > Face ID" e vou colocar esse "Matching Face". Ele autoriza e deleta. Vamos ver se deletou mesmo? Vou rodar o projeto de novo, vou em "Recibos" e nós só temos três.
+
+[13:08] É importante tratarmos também casos de erro. Se você for utilizar isso no seu aplicativo, você pode simular, caso não tenha autenticado, ou seja, caso a pessoa não valide a autenticação, você pode vir em "Features > Face ID" e clicar nesse "Non-matching Face", ou seja, não é o usuário que está utilizando o celular.
+
+[13:34] Ou seja, não é para autenticar. Nesse caso eu poderia exibir um alert controller, poderia tratar, mas é uma observação importante que temos que pontuar. Então é relativamente tranquilo nós utilizarmos essa lib do local authenticator, porém ainda podemos refatorar algumas coisas.
+
+[13:58] Como, por exemplo, nós estamos extraindo os comportamentos de bibliotecas para algumas classes, para não deixar o view controller massivo, cheio de coisas que não deveria, então esse é um caso que podemos criar uma classe específica para autenticação. Vamos, a seguir, separar essas responsabilidades, deixar tudo isso separado em uma classe de autenticação.
+
+@@03
+Refatorando classe autenticação
+
+[00:00] Vamos refatorar então essa implementação da autenticação local que nós criamos aqui. A ideia é extrairmos tudo isso para uma classe e deixar o view controller sabendo da menor quantidade de coisas possível, então ele só vai chamar uma classe que executa essa ação de autenticar, mas ele não sabe qual o framework, não tem implementação de nada. Vamos tentar limpar um pouco essa implementação.
+[00:29] Aqui vamos criar uma nova classe, ou struct, dentro da pasta "Model". Botão direito, novo arquivo, ele nos traz as opções de classe, vou escolher "Swift File". O nome do arquivo será autenticação, sem acento, local, "AutenticacaoLocal". Vou dar um "Create" e vamos criar uma classe para nos ajudar com isso.
+
+[01:05] Vou apertar a tecla "Command + T", quando eu aperto "Command + T" eu consigo trabalhar com duas janelas, basicamente. Em uma eu vou deixar a classe que nós criamos e na outra eu vou deixar o "ReciboViewController". Para começar, eu vou pegar essa constante e essa variável error e vou passar para a nova classe. "Command + X", vou colocar elas na outra aba.
+
+[01:42] Temos private authenticatorContext = LAContext(), private var error: NSError?, que nós não queremos que ninguém de fora enxergue essas variáveis. Aqui ele está pedindo para importar o local authentication context, então voltamos no "ReciboViewController", vamos tirar esse import do view controller, "Command + X", e vamos passar para a classe que nós acabamos de criar, "Command + V".
+
+[02:11] Agora, o que vamos fazer? Eu vou criar um novo método dentro da classe AutenticacaoLocal, vai se chamar func autorizaUsuario(). Dentro desse método, precisaremos daquela verificação, do if, se podemos utilizar esse recurso. Eu vou pegar esse if do view controller, vou dar um "Command + C", vou passar para o novo método.
+
+[02:47] Dentro dele vamos de fato chamar a autenticação. Eu vou pegar todo esse código do view controller, "Command + C", "Command + V", só está faltando uma chave. O que eu vou fazer aqui?
+
+[03:10] Eu preciso, de alguma forma, saber no view controller se ocorreu um sucesso ou um erro para de fato deletarmos o recibo, porque essa parte nós vamos manter no view controller, todo o resto vamos passar para a nova classe. Primeiro, o que eu vou fazer aqui? Eu vou dar um "Command + X", vou apagar toda essa parte do código e vou deixar o nosso método como era antes.
+
+[03:45] Até esse flat agora eu não preciso mais, porque o self era opcional, agora não é. Então o nosso método antigamente era assim. Vou tirar esse ponto de interrogação do self. O que precisamos fazer?
+
+[04:00] A ideia é utilizarmos a classe que nós criamos, então seria mais ou menos assim: AutenticacaoLocal.autorizaUsuario(). Só que precisamos saber se ocorreu um erro ou se deu sucesso, para apagar o recibo ou não. Nós precisamos do retorno dessa função. Nós podemos utilizar um recurso bem interessante, que se chama closure, que é, na verdade, implementar uma função dentro de outra função.
+
+[04:31] Nós vamos fazer isso para nos ajudar a ter acesso à resposta da autenticação. Aqui, na assinatura do método autorizaUsuario, o que vamos fazer? Vamos criar um bloco de func autorizaUsuario(completion: ), quer será o seguinte, nós precisamos colocar essa palavra reservada : @escaping(), e vamos passar a (autenticacao: Bool) ->, que é do tipo booleano.
+
+[05:00] E aqui retornamos -> Void), ou seja, sem retorno. Quando fazemos isso, olha que interessante, quando chamamos agora esse método autorizaUsuario, ele mudou, olha como ele está.
+
+[05:16] E quando eu aperto o "Enter", eu tenho acesso à variável que nós criamos na nova classe, que é essa autenticacao. Então eu posso dar um nome para essa variável, eu vou dar o nome, por exemplo, de autenticado e aqui eu consigo fazer uma verificação, if, se for autenticado, eu pego tudo isso, que é o método onde deletamos o recibo, e de fato deleto.
+
+[05:50] Mas, para isso funcionar, nós precisamos chamar - aqui ele está reclamando porque estamos dentro de uma closure, então precisamos do self, recibo.deletar(self.contexto).
+
+[06:03] Só que agora precisamos chamar esse completion aqui embaixo, na "AutenticacaoLocal". Vou passar o completion() e vou passar o (sucesso). Como não estamos mais utilizando nenhuma referência, podemos até tirar, para ele parar de dar warning, e temos então esses dois parâmetros.
+
+[06:32] Como faremos então para testar? Vamos rodar o nosso projeto, ele vai verificar se estamos de fato apagando um recibo utilizando a autenticação. Vamos lá, vou rodar o meu simulador, vou fechar essa parte de baixo, para ganharmos espaço. Olha que legal, eu vou vir no "Recibos", vou apertar o "X" e não estamos ainda conseguindo apagar. Vamos ver o que está acontecendo.
+
+[07:10] Vou colocar um breakpoint, vou clicar no "X" no simulador. Ele caiu dentro do breakpoint, vamos entrar no método. Aqui o que precisamos, na verdade, é ir em hardware e utilizar esse recurso do simulador. Se você estiver utilizando seu iPhone físico para testar, você não terá nenhum problema. Como estamos utilizando o simulador, precisamos ir em "Features > Face ID > Enrolled".
+
+[07:47] Vou marcar a opção, vou entrar no método. Vou de novo em "Feature > Face ID", vou autorizar o uso. Vou clicar no "X" no simulador, ele vai abrir a tela do face id, como se estivéssemos olhando para o iPhone, por isso apareceu aqui esse "Face ID".
+
+[08:17] Temos duas opções: ou autorizamos, que é o caso que vamos fazer agora, esse "Features > Face ID > Matching Face", significa que é a autenticação do usuário mesmo, ou não autorizamos e tratamos o erro, caso queiramos fazer isso. Vou autorizar, ele caiu aqui no código e vai deletar o recibo perfeitamente. Tirei o breakpoint, vou clicar no ícone de play, em continuar a execução do programa, e ele apagou.
+
+[08:49] Mais uma vez, eu posso clicar no "X" no simulador, dessa vez eu vou em "Features > Face ID" e vou clicar em "Non-matching Face", ou seja, não vou autorizar, ou é outra pessoa que pode ter pego o seu iPhone, não sei. Ele dá um erro, falando que a face não foi reconhecida.
+
+[09:13] Nós poderíamos tratar um erro aqui. O mais importante é que agora nós extraímos a responsabilidade de autenticação local para uma classe específica. Essa classe, ela tem a implementação do framework, ela tem a implementação e a utilização desse framework.
+
+[09:37] Dessa forma conseguimos deixar o nosso view controller um pouco mais limpo. Então esse é o recurso de autenticação local, ele é muito utilizado para essas coisas que já comentamos, como apps de banco ou quando você precisa fazer alguma operação mais sensível no seu aplicativo, sempre é interessante utilizarmos esse tipo de recurso.
+
+@@04
+Autenticação do iOS
+
+Um recurso muito interessante para melhorar a segurança do app é a autenticação local.
+Qual classe utilizamos para utilizar esse recurso?
+
+
+Alternativa correta
+OAuth
+ 
+Alternativa correta
+LAContext
+ 
+Alternativa correta! Correto. A classe CLContext permite que o app solicite que o usuário se autentique usando a biometria/face id ou a senha numérica cadastrada no iOS.
+Alternativa correta
+LContext
+ 
+Alternativa correta
+AutenticationContext
+ 
+Parabéns, você acertou!
+
+@@05
+Faça como eu fiz: Uso da autenticação no app
+
+O uso da classe LAContext nos possibilita utilizar o recurso de autenticação do iOS (biométrico, senha ou face id).
+Um bom exemplo de aplicação, em nosso projeto, é no momento de deletar uma marcação de ponto, no qual o ideal é que somente o proprietário do dispositivo possa fazer esse tipo de operação.
+
+Como podemos implementar isso em nosso projeto?
+
+Para utilizar o recurso de autenticação, podemos criar uma classe como essa:
+import Foundation
+import LocalAuthentication
+
+class AutenticacaoLocal {
+
+    private let authenticatorContext = LAContext()
+    private var error: NSError?
+
+    func autorizaUsuario(completion: @escaping(_ autenticao: Bool) -> Void) {
+        if authenticatorContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            authenticatorContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: "É necessário autenticação para apagar um recibo") { sucesso, error in
+
+                completion(sucesso)
+            }
+        }
+    }
+}
+
+@@06
+O que aprendemos?
+
+Nessa aula, aprendemos como utilizar o recurso de autenticação local para proteger determinadas operações em nosso aplicativo. É importante ressaltar que muitos aplicativos bancários e que cuidam de operações sensíveis utilizam esse recurso.
