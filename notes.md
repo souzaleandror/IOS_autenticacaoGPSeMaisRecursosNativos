@@ -380,3 +380,208 @@ class AutenticacaoLocal {
 O que aprendemos?
 
 Nessa aula, aprendemos como utilizar o recurso de autenticação local para proteger determinadas operações em nosso aplicativo. É importante ressaltar que muitos aplicativos bancários e que cuidam de operações sensíveis utilizam esse recurso.
+
+#### 26/08/2023
+
+@03-Utilizando a localização do usuário
+
+@@01
+Projeto da aula anterior
+
+Se você deseja começar o curso a partir desta aula, pode fazer o download do projeto desenvolvido até o momento.
+
+https://github.com/alura-cursos/2316-alura-ponto-parte2/archive/7c800b3d1e7ae0fc3a9998698aaf11351db4ff92.zip
+
+@@02
+Trabalhando com Core Location
+
+[00:00] A partir de agora vamos começar a falar um pouco sobre localização, então nós vamos utilizar um framework que se chama core location. A ideia é, a partir de agora, nós sabermos onde foi batido o ponto do funcionário. A empresa solicitou essa nova regra de negócio, que ela deseja saber qual a localização do funcionário no momento em que ele bate o ponto, e vamos implementar essa funcionalidade.
+[00:29] Quando falamos em localização, traduzindo tudo o que a lib faz, trabalhamos com latitude e longitude, então precisamos saber a localização atual do usuário para salvarmos a latitude e a longitude. Isso é muito utilizado em aplicativos de paquera, onde você passa em determinada região e você consegue saber quem está por perto, enfim, é mais ou menos por esse caminho.
+
+[00:57] Então sabendo a localização do usuário, você consegue mostrar no mapa onde é que foi registrado, no nosso caso, o ponto. Então vamos começar a entender como funciona a utilização da localização do usuário. Nós vamos voltar no "HomeViewController", nós vamos criar uma nova variável, eu vou chamar de var gerenciadorDeLocalizacao =. Ela é do tipo = CL, de core location, = CLLocationManager.
+
+[01:38] Eu vou utilizar aqui uma variável, um lazy var, então, na verdade, eu vou deixar dessa maneira, lazy var gerenciadorDeLocalizacao. Lazy var, ele é instanciado somente no momento em que a variável for utilizada, então ele ajuda no gerenciamento de memória. Com isso, vamos criar então um novo método, dentro do nosso view controller por enquanto, e vamos chamar esse método de func requisicaoDaLocalizacaoDoUsuario().
+
+[02:21] Eu não sou muito bom com métodos em português, mas vamos deixar assim, func requisicaoDaLocalizacaoDoUsuario(). O que precisamos fazer? Há alguns controles de estado quando trabalhamos com localização, então podemos pedir a localização do usuário somente quando ele estiver com o aplicativo em primeiro plano, ou seja, ele estiver usando o aplicativo.
+
+[02:49] Podemos também pedir a solicitação para sempre conseguir trackear a localização do usuário, independente se ele está com o app aberto ou em segundo plano, por exemplo, no caso de GPS, você pode estar utilizando o GPS do celular, quando você vai para outro aplicativo, ele continua mapeando a sua localização, esse é um exemplo de sempre pedir a localização do usuário.
+
+[03:16] O usuário pode negar ou ainda ele não pode ter visto nenhuma dessas opções, pode ser a primeira vez dele, então não tem nada determinado. Baseado nisso, vamos trabalhar com esses tipos de requisições de localização que nós temos. Primeiro vamos utilizar alguns métodos do nosso gerenciador de localização, principalmente para trackear o momento em que muda a sua localização, enfim.
+
+[03:48] Tem alguns métodos de delegate que vamos implementar, então, por isso eu estou setando o gerenciadorDeLocalizacao.delegate = self aqui. Nós vamos implementar este protocolo aqui embaixo, extension HomeViewController: CLLocationManagerDelegate {}. Implementamos, só para ele parar de reclamar, e agora vamos começar então as implementações.
+
+[04:17] Primeiro, como sempre, vamos fazer a verificação se o recurso está disponível no device que estiver em uso. Como eu faço isso? if CL, de core location, if CLLocationManager., eu dou esse .locationServicesEnabled(), vamos verificar se o recurso está disponível. Se estiver, vamos utilizar.
+
+[04:41] switch gerenciadorDeLocalizacao.authorizedStatus, vamos saber qual é o status. Pode ser que o usuário já tenha sempre autorizado, ou ele pode ter autorizado somente quando o aplicativo está em uso, nesses dois casos, case .authorizedAlways, .authorizedWhenInUse: break, por enquanto eu não vou fazer nada. Quais outros casos nós temos também?
+
+[05:03] Nós temos o case .denied, ou seja, ele não autorizou, então poderíamos aqui, por exemplo, //Mostrar um alert explicando e pedindo novamente a autorização. Esse seria um caso. Quais outros casos que temos aqui que são interessantes sabermos? No caso de não estar determinado ainda, ou seja, nós nunca pedimos a localização para o usuário.
+
+[05:39] Então para nós agora isso é muito importante, porque podemos pegar o gerenciador de localização e pedir a autorização, gerenciadorDeLocalizacao.requestWhenInUseAuthorization(). Nós vamos pedir autorização quando o aplicativo estiver em uso. Depende muito da regra de negócio que você está utilizando no seu app.
+
+[05:56] Se sempre você precisar da localização do usuário então você precisa mudar aqui para gerenciadorDeLocalizacao.requestAlwaysAuthorization(). Então depende muito da regra de negócio do seu app. Em default: não vou pôr nada. Já temos aqui o nosso primeiro método, que serve para verificar qual é o status da autorização do usuário.
+
+[06:26] Então se ele já autorizou, sempre ou quando o app está em uso, se ele não autorizou, se ele negou, ou se ele ainda não escolheu nenhuma opção, se é a primeira vez que o app é aberto, por exemplo. Nós vamos chamar esse método no viewDidLoad(), vou colocar aqui requisicaoDaLocalizacaoDoUsuario().
+
+[06:48] Agora vamos trabalhar aqui um pouco, nesses métodos de delegate. Existem dois métodos que são muito importantes, o primeiro é esse did change authorization. Assim que o usuário autorizar ou negar, ou fazer alguma coisa em relação à autorização, ele cai neste método e nós conseguimos fazer alguma coisa.
+
+[07:12] Por exemplo, eu abro o aplicativo, o usuário autorizou, então eu já quero começar a trackear a localização dele. É aqui que nós mexemos. O que vamos fazer aqui? switch para verificar os casos que nós temos, ele já me traz, pela assinatura de método, esse manager, só que eu preciso saber da autorização do status, switch manager.authorizationStatus.
+
+[07:41] Se ele autorizou sempre ou quando o app está em uso, é o que eu preciso, vou pegar o meu gerenciadorDeLocalizacao. e vou começar a atualizar a sua localização, .startUpdateLocation(). default, não vou fazer nada.
+
+[08:01] O segundo método é de fato quando o usuário se mexe, ou seja, quando ele muda de localização, já queremos saber onde ele está para registrar o ponto, então precisamos saber e conseguimos isso através desse método, que é did update location. Basicamente ele traz esse parâmetro que é muito importante, que é esse location:, onde conseguimos ter acesso à latitude e à longitude do usuário através dele, que é o que de fato precisamos.
+
+[08:33] Eu vou fazer um if let, por exemplo, if let localizacao = locations.first {}. Aqui, olha que bacana, eu consigo ver a print(localizacao.coordinate.latitute) e a mesma coisa com a longitude, print(localizacao.coordinate.longitude). No fim das contas é desses dois dados que nós precisamos.
+
+[09:08] Como já cansamos de ver, nós precisamos fazer um outro passo, que também é muito importante, que é pedir a autorização do usuário, principalmente com localização, que é algo muito sensível, o usuário precisa saber que o nosso aplicativo está monitorando a sua localização. Como fazemos isso?
+
+[09:30] Através do "Info.plist". Nós vamos adicionar uma nova entrada no nosso "Info.plist", vou digitar "Privacy" e vamos procurar por location. Tem vários aqui, location always usage description, o que precisamos é essa opção aqui, "Privacy - Location When In Use Usage Description". Vamos utilizar essa entrada no nosso "Info.plist".
+
+[10:08] E podemos colocar a nossa mensagem, explicando para o usuário porque nós precisamos utilizar esse recurso do device dele: "Precisamos de sua localização para registrar o ponto eletrônico". Feito tudo isso vamos então testar. Vou colocar um breakpoint na linha 129, vou rodar o aplicativo. Olha que legal.
+
+[10:50] Já temos aqui essa mensagem pedindo a autorização do usuário, eu vou colocar aqui "Allow While Using App", vou permitir enquanto o app estiver rodando. É importante nós utilizarmos esse recurso do simulador, que é esse ícone de seta, de simular a localização.
+
+[11:17] Quando você estiver rodando no seu device não vai precisar, mas como estamos rodando no simulador, podemos simular alguma dessas localizações aqui.
+
+[11:28] Eu coloquei "Rio de Janeiro, Brazil" e ele caiu nesse método didUpdateLocation. Então aqui temos acesso, de fato, à latitude e à longitude do usuário.
+
+[11:42] Vou tirar o breakpoint, vou continuar a execução do programa. Nós já conseguimos dar os primeiros passos na utilização do core location, já temos aqui a latitude e a longitude. Agora precisamos salvar essa latitude e essa longitude, então teremos que adicionar mais dois atributos na nossa classe e também vamos ter que mexer no schema do core data, mas veremos isso a seguir.
+
+@@03
+Salvando latitude e longitude
+
+[00:00] Agora que nós já temos acesso à latitude e à longitude, nós precisamos modificar algumas coisas no nosso projeto como, por exemplo, a classe "Recibo", porque a partir de agora começaremos a salvar a localização do usuário assim que batemos o ponto. Então precisamos adicionar dois atributos aqui, a latitude e a longitude, e também nós precisamos mexer no schema do nosso data model no core data.
+[00:30] Vamos começar essas alterações. Eu vou voltar para a "HomeViewController". Primeiro vamos criar duas variáveis, que vão guardar os valores da latitude e da longitude, então será o seguinte, aqui em cima eu vou criar duas variáveis, private var latitude:.
+
+[00:58] A latitude é desse tipo : CLLocationDegrees?. Mas, no fundo, se seguramos a tecla "Command", clicarmos na palavra e clicarmos em "Jump to Definition", no fim das contas ele é um typealias, ele é um apelido para dizer que é um double.
+
+[01:21] Só para entendermos, é um double mesmo. Vamos criar então uma variável também para a longitude, que é do tipo private var longitude: CLLocationDegrees?. Com essas duas variáveis, já podemos utilizar elas aqui embaixo. Vou fazer o seguinte: latitude = localizacao.coordinate.latitude. E longitude = localizacao.coordinate.longitude. Já estamos armazenando a latitude e a longitude.
+
+[01:58] Quando salvamos - quando escolhemos a foto, na verdade, que é esse método de delegate, o didSelectFoto, nós criamos o objeto recibo e depois salvamos ele. Então vamos adicionar mais dois atributos nesse método. Vamos começar mexendo no schema do core data. Nós já temos aqui o que nós estamos persistindo nessa entidade "Recibo".
+
+[02:30] Nós temos a data, a foto, o ID, o status e vamos adicionar a latitude, como nós havíamos falado, ele é, na verdade, um type alias para double, então podemos deixar como double. E também adicionar a longitude, latitude e longitude, também como double.
+
+[02:59] Com isso já podemos alterar o nosso modelo, o nosso recibo. A partir de agora, além do status, da data e da foto, nós teremos a latitude:, podemos enviar como : Double mesmo, e teremos também a longitude: Double.
+
+[03:30] Vamos criar aqui mais dois atributos, vamos seguir esse mesmo padrão, como eles serão mapeados para salvar no core data, então precisamos seguir esse padrão. @NSManaged var latitude: Double, @NSManaged var longitude: Double. E agora utilizamos ele aqui, self.latitude = latitude e self.longitude = longitude.
+
+[04:15] Vou dar um "Command + B" para buildarmos o projeto. Como nós mudamos a assinatura do método, então agora teremos que alterar também no "HomeViewController". Agora temos a latitude, nós já temos uma variável aqui, que nós declaramos lá em cima para latitude e também para longitude, então é só passar elas aqui embaixo, longitude: longitude.
+
+[04:45] Então, "Command + B", que é opcional. E no nosso "Recibo", nós pedimos que passe a latitude e a longitude sem ser opcional, mas podemos fazer uma verificação aqui, se não existir valor, setamos como 0 e a mesma coisa na latitude.
+
+[05:13] O que vamos fazer agora? Eu vou colocar um breakpoint na linha 115 - na verdade, eu vou rodar o projeto, vamos ver se a latitude e a longitude estão sendo preenchidas. Vamos colocar um breakpoint na linha 133. Agora eu vou utilizar uma localização, vamos ver o valor dessas variáveis, po latitude, po longitude.
+
+[05:47] Agora, na hora que salvarmos um ponto, ele já vai passar então as informações corretas. Uma coisa interessante, que nós veremos a seguir, é como movemos essa localização, toda essa parte de localização para uma classe separada.
+
+[06:09] Estamos batendo bastante nessa tecla de não deixar o nosso view controller, o que a comunidade chama de massive view controller, o view controller massivo, com muitas informações que não dizem respeito a ele e sim a outras implementações. Por que estamos nos preocupando tanto com isso?
+
+[06:28] Principalmente pela qualidade do código, então é muito importante conseguirmos dar uma manutenção fácil, se eu preciso mexer em localização, eu já sei que tem uma classe responsável para isso, eu preciso mexer na autenticação, eu já sei que tem uma classe responsável por isso.
+
+[06:44] Imagine se deixássemos tudo no view controller, ia virar uma salada de fruta e seria muito difícil entendermos e, de fato, conseguirmos fazer alguma refatoração. Então, a seguir, veremos como fazemos para refatorar essa parte da localização.
+
+@@04
+Testando a localização
+
+[00:00] Agora vamos refatorar toda a parte da localização para uma nova classe, que nós vamos criar agora. Aqui, na pasta "Model", nós já estamos centralizando várias funcionalidades, vamos criar uma nova classe "Swift File", chamada "Localizacao". "Create". Vamos começar criando um método para pedir a permissão para o usuário, semelhante ao que já fizemos no view controller.
+[00:37] Vou chamar de func permissao(). Nós vamos receber, por parâmetro, o ( gerenciadorDeLocalizacao:, que é do tipo : CLLocationManager). Aqui, na verdade, precisamos importar o import CoreLocation. : CLLocationManager).
+
+[01:12] Além disso, vamos precisar de algumas variáveis para armazenar, por exemplo, a latitude e a longitude, então já vou criar elas aqui, private var latitude: CLLocationDegrees?, porque nós vimos que, no fundo, isso é um double, é apenas um type alias, private var longitude: CLLocationDegrees?.
+
+[01:42] E também nós vamos implementar o protocolo onde vamos enxergar, na verdade, todos esses métodos do view controller de localização, esse locationManagerDidChangeAuthorization e esse didUpdateLocation. Como faremos isso? Estamos recebendo aqui, por parâmetro, esse gerenciadorDeLocalizacao, então vamos nele, gerenciadorDeLocalizacao.delegate = self.
+
+[02:16] Quando fazemos isso, ele vai reclamar, porque nós não implementamos o protocolo CL location manager delegate. Na verdade, o que precisamos é exatamente desse bloco de código aqui.
+
+[02:32] Eu vou recortar, "Command + X", e vou colar ele dentro da nossa classe, "Command + V". A única coisa que precisamos mudar é isso aqui, estamos criando uma extension não de HomeViewController, mas sim de localização, então extension Localizacao que está implementando esse protocolo de delegate.
+
+[02:54] Por enquanto nós vamos deixar assim, agora o que precisamos fazer é utilizar essa latitude e longitude no view controller. Nós precisamos criar, na verdade, um protocolo da localização para conseguirmos voltar essa informação para o view controller, depois que obtivermos a latitude e a longitude, precisamos devolver isso para o view controller.
+
+[03:27] Vamos criar aqui esse protocolo. O nome dele será protocol LocalizacaoDelegate: AnyObject {}. Teremos um método aqui que vai se chamar func atualizaLocalizacaoDoUsuario(). Nós vamos passar a latitude, que é do tipo double, e a longitude, que é do tipo double, (latitude: Double, longitude: Double).
+
+[04:03] Precisaremos criar uma variável do tipo desse protocolo, nós estamos usando aqui o design pattern que se chama delegate, então precisamos ter uma variável que acessemos fora dessa classe. Nós vamos criar ela agora. Aqui é importante a referência ser fraca, então weak var delegate:, do tipo do protocolo, : LocalizacaoDelegate?.
+
+[04:31] Aqui embaixo, depois que obtivermos a latitude e a longitude, vamos então chamar esse protocolo, delegate?.atualizaLocalizacaoDoUsuario(). Vou passar a latitude e vou passar a longitude, (latitude: latitude, longitude: longitude).
+
+[04:52] Aqui ele está reclamando porque a assinatura do método nós colocamos sem ser opcional, mas eu vou deixar aqui opcional, (latitude: Double?, longitude: Double?), e fazemos a validação na classe que implementar esse protocolo. Agora, o que nós vamos fazer aqui? Precisamos corrigir, na verdade, esse erro que ele está dando aqui, que é justamente porque não temos acesso ao gerenciador de localização.
+
+[05:18] Mas nós temos acesso a esse manager, que é do mesmo tipo. Agora vamos voltar no "HomeViewController" para fazer algumas refatorações. A primeira coisa que nós vamos fazer será a implementação daquele protocolo que nós criamos, da localização, nós temos que implementar esse protocolo.
+
+[05:43] Para implementar esse protocolo nós precisamos criar uma variável do tipo localização. Vamos lá, aqui nós temos o nosso lazy var gerenciadorDeLocalizacao, logo abaixo eu vou criar um private lazy var localizacao = e eu vou inicializar ela aqui, = Localizacao(). Agora, o que vamos fazer?
+
+[06:11] Vamos utilizar essa variável localização em um método que vamos criar aqui embaixo, que ao invés de ser esse requisicaoDaLocalizacaoDoUsuario, o que vamos fazer aqui? Vamos utilizar a classe que nós criamos. Aqui eu vou apagar esse bloco, vou chamar a localizacao.delegate = self, então estamos implementando o protocolo que nós criamos.
+
+[06:47] Estamos, na verdade, falando que nós vamos implementar esse protocolo. Ele vai reclamar porque vamos implementar ele agora. Vou criar um extension HomeViewController: e vou implementar o = LocalizacaoDelegate {}. Aqui nós temos acesso ao atualizaLocalizacaoDoUsuario.
+
+[07:08] Além disso, precisamos chamar o método permissao. Esse método permissao, o que ele vai fazer Eu vou voltar um pouco, só para reutilizarmos o que estava aqui. Ele vai fazer exatamente isso aqui, é isso aqui que ele vai fazer.
+
+[07:32] Vou dar um "Command + C", vou passar ele para baixo, onde nós vamos pedir a localização do usuário, igual nós estávamos fazendo lá. Agora vou dar um "Command + Shift + Z", e voltamos à implementação que nós fizemos.
+
+[07:50] Aqui eu vou chamar a localizacao.permissao() e eu vou passar o (gerenciadorDeLocalizacao). Aqui embaixo, nós estamos atualizando a localização do usuário, nós teremos acesso à latitude e à longitude, o que vamos fazer? Vamos armazenar isso em uma variável, nós já temos aqui a latitude e a longitude, e o que vamos fazer é utilizar essas duas variáveis aqui.
+
+[08:30] Latitude é igual à latitude que estamos recebendo por parâmetro, se vier nil nós setamos como 0, latitude = latitude ?? 0.0. E a longitude a mesma coisa, longitude - longitude ?? 0.0. Vou dar um "Command + B". Aqui ele está falando que a latitude, uma constante. Ele está pegando a referência dessa latitude do atualizaLocalizacaoDoUsuario.
+
+[09:00] Então vamos fazer o seguinte, vou dar um self.latitude e um self.longitude, para pegarmos a referência das variáveis do view controller e não as que estamos recebendo por parâmetro.
+
+[09:14] "Command + B", vamos ver se já está tudo buildando. Agora o que eu vou fazer? Eu vou rodar no meu iPhone para bater um ponto e verificar se realmente estamos salvando o recibo com a latitude e com a longitude. Eu vou colocar um breakpoint na linha 103 e vou rodar no meu iPhone para testarmos.
+
+[09:42] Já espelhei o meu iPhone no Mac, então vamos fazer um teste. Vou clicar em "Registrar Ponto", tira uma foto, clico em "Use Photo" e agora temos acesso à latitude e à longitude. Vamos ver aqui, po latitude e po longitude.
+
+[10:06] Olha que bacana, então nós vamos salvar e eu vou pôr um breakpoint nesse método onde nós estamos pegando a latitude que está vindo por parâmetro, tanto a latitude quanto a longitude, e estamos atribuindo à variável que nós temos da classe.
+
+[10:40] Para vermos que realmente funcionou, eu vou clicar em "Recibo" e eu vou verificar se ele já está listando o recibo com a latitude e com a longitude. Vou abrir o "ReciboViewController", no método cellForRowAt, eu tenho acesso ao recibo.
+
+[11:02] Vamos ver como está esse objeto recibo. Vou apagar todas as mensagens, po recibo?.latitude, po recibo?.longitude.
+
+[11:20] Olha que bacana, nós já estamos com o acesso à localização do usuário. Agora, o próximo passo é continuarmos as implementações para conseguirmos exibir isso de fato no mapa.
+
+@@05
+Autorização de recursos
+
+Estudamos na aula que, para utilizar alguns recursos do device (aparelho) como a câmera ou o GPS, precisamos de autorização do usuário.
+Assinale as alternativas que explicam corretamente os tipos de au
+
+.notDetermined: Esse status representa quando o usuário nega a utilização da localização.
+ 
+Alternativa correta
+.authorizedWhenInUse: Solicita autorização para usar serviços de localização somente quando o aplicativo está sendo executado.
+ 
+Alternativa correta! Essa opção é utilizada para autorizar os recursos somente quando o aplicativo está sendo executado em primeiro plano.
+Alternativa correta
+requestAlwaysAuthorization: Solicita permissão para usar os serviços de localização sempre que o aplicativo está sendo executado.
+ 
+Alternativa correta! Essa opção é utilizada para pedir autorização do usuário para o app utilizar sempre sua localização (mesmo estando em Standby).
+Alternativa correta
+.notDetermined: Solicita autorização do usuário a primeira vez que a feature é inicializada.
+ 
+Alternativa correta! Essa opção é utilizada para pedir autorização para o usuário a primeira vez que ele entra na funcionalidade.
+
+@@06
+Faça como eu fiz: Localização do usuário
+
+Neste capítulo, foi implementada uma nova regra de negócio que é a seguinte: toda vez que o usuário registra o ponto, devemos registrar também sua localização (latitude e longitude).
+Como podemos fazer isso?
+
+Depois de configurar a permissão da localização do usuário, podemos configurar os métodos de delegate da classe CLLocationManagerDelegate:
+extension Localizacao: CLLocationManagerDelegate {
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            manager.startUpdatingLocation()
+        default:
+            break
+        }
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let localizacao = locations.first {
+            latitude = localizacao.coordinate.latitude
+            longitude = localizacao.coordinate.longitude
+        }
+
+        delegate?.atualizaLocalizacaoDoUsuario(latitude: latitude, longitude: longitude)
+    }
+}
+
+@@07
+O que aprendemos?
+
+Nessa aula, aprendemos como configurar o app para permitir que seja obtida a localização do usuário através da latitude e longitude.
