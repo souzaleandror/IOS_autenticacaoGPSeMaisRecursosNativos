@@ -744,3 +744,156 @@ func adicionarPino() {
 O que aprendemos?
 
 Nessa aula, aprendemos como implementar o mapa e também como configurá-lo para exibir pontos importantes para o usuário, através da classe MKPointAnnotation.
+
+@05-Trabalhando com shortcuts
+
+@@01
+Projeto da aula anterior
+
+Se você deseja começar o curso a partir desta aula, pode fazer o download do projeto desenvolvido até o momento.
+
+@@02
+Atalhos com shortcut
+
+[00:00] Para finalizar o nosso curso, eu queria mostrar um recurso muito interessante que temos aqui disponível para utilizar nos aplicativos iOS, e se você é usuário iOS você já deve ter visto, que são os shortcuts. Vários apps, quando fazemos o clique um pouco mais forte em cima do ícone, por exemplo, aqui em "Contato", eu clico e seguro.
+[00:26] Ele abre esse menu com algumas opções. Isso se chama shortcut e é muito interessante utilizarmos para melhorar a usabilidade do nosso aplicativo, então nós já conseguimos mostrar para o usuário algumas funcionalidades principais, para ele acessar, como, por exemplo, aqui no caso de contato, ele já pode adicionar um novo contato sem mesmo ter entrado no aplicativo.
+
+[00:51] No caso, por exemplo, de apps bancários, a pessoa já pode entrar na tela de pagamentos, na tela de transferências. São realmente atalhos que podemos colocar no aplicativo. No nosso caso, nós vamos adicionar um shortcut para o usuário conseguir bater o ponto sem precisar abrir o app, clicar em registrar ponto, então vamos criar esse atalho para ele.
+
+[01:14] Como trabalhamos com o shortcut? Nós vamos vir no "Info.plist", que nós temos aqui, e vamos configurar algumas coisas dentro desses registros que nós temos aqui. Para começar, eu vou adicionar um novo registro clicando no botão "+". Cliquei aqui, o registro que eu vou adicionar é esse "UIApplicationShortcutItems".
+
+[01:47] Ele é do tipo "Array", então eu vou colocar array. Eu vou adicionar um novo item dentro desse array. Eu clico em adicionar no registro, ele vai adicionar um novo item. Esse novo item, ele tem que ser um "Dictionary", ele tem que ser um dicionário. Dentro dele vamos colocar algumas entradas como, por exemplo, o tipo.
+
+[02:12] O tipo é para identificarmos em qual opção desse shortcut o usuário clicou, então pode ter mais do que uma. Por exemplo, se eu tenho a opção de registrar ponto, será um tipo, se eu tenho de deletar, será outro tipo. É como se fosse um ID para identificarmos qual opção o usuário clicou.
+
+[02:30] Vamos lá, aqui eu vou nomear da seguinte maneira: "UIApplicationShortcutItemType" e eu vou colocar um valor para esse tipo, "RegistrarPonto". Nós temos que tomar muito cuidado porque esse mesmo valor nós vamos utilizar no enum que nós vamos criar, então tem que ser a validação utilizando exatamente esse valor.
+
+[03:01] Vou adicionar mais uma opção, que é agora o ícone, então repare que quando fazemos o long press um pouco mais forte, ele abre um título e um ícone do lado. Então nós podemos configurar essas duas opções.
+
+[03:19] Vamos voltar no nosso caso. Vamos utilizar um ícone que já existe no iOS, então "UIApplicationShortcutItemIconType". O nome do ícone, como é um ícone que já existe para o iOS, é o seguinte, "UIApplicationShortcutIconTypeCompose". Por último, vamos adicionar um título para essa opção, ou seja, qual é o título que nós queremos exibir. No caso do contato, "Create New Contact", esse é o título.
+
+[04:02] No nosso caso, vamos colocar outro título, mas o título nós colocamos através desse registro "UIApplicationShortcutItemTitle" e o título podemos colocar qual título quisermos, no meu caso aqui, "Registrar ponto".
+
+[04:29] Eu vou rodar o projeto, vou gerar um build no simulador. Vou voltar para a tela inicial, vou clicar e vou segurar. Nós já temos uma opção no nosso shortcut.
+
+[04:46] "Registrar ponto", olha que bacana. Agora nós precisamos mexer na configuração de quando clicarmos em cima dessa opção. Onde ele cai quando eu clico em cima dessa opção? Ele cai em um método no SceneDelegate.
+
+[05:03] Nós temos aqui um método, que se chama shortcutItem, é esse performActionFor shortcutItem. Quando clicamos lá, ele cai aqui. O que nós precisamos saber? Como aquele menu do shortcut ele pode ter várias opções, vários atalhos, nós precisamos saber em qual opção o usuário clicou.
+
+[05:30] Por isso eu vou criar aqui um enum, só para mantermos um pouco mais organizado e, futuramente, se formos adicionar mais algumas opções, adicionamos no enum.
+
+[05:40] enum TipoDeShortcut: String. Então case registrarPonto = aqui tem que ser exatamente igual a esse type que nós colocamos no "Info.plist", "RegistrarPonto". Eu vou até copiar e colar, porque tem que ser exatamente igual a esse registro. Eu coloco ele aqui, = "RegistrarPonto". E se tivermos mais opções no shortcut?
+
+[06:13] É só adicionar mais um case, por exemplo, deletar registro, nós vemos o que colocamos no "Info.plist" de type e colocamos a mesma coisa aqui. Isso é o legal de trabalhar com enum nesse caso. Agora, o que vamos fazer? Vamos voltar nesse método performActionFor shortcutItem e primeiro vamos ver esse parâmetro shurtcutItem.
+
+[06:43] shortcutItem.type é o tipo do shortcut que o usuário clicou. Então nós precisamos verificar se esse tipo existe no nosso enum, se existir, nós fazemos o que nós precisamos. Vou criar aqui um if let tipo =, ele é igual ao tipo do enum que nós criamos, = TipoDeShortchut(rawValue: ).
+
+[07:03] No raw value eu passo rawValue: shortcutItem.type). Se existir, ele vai entrar aqui. Se entrar aqui, nós podemos fazer um switch tipo {} e tratar o caso case .registrarPonto:. Como só temos um caso por enquanto, esse default nós não vamos utilizar. Aqui, em .registrarPonto:, o que precisamos fazer?
+
+[07:26] Precisamos navegar para a tela inicial e abrir a câmera, é isso o que vamos fazer. Só que não temos o navigation controller, quando criamos o aplicativo, ele cria como um tabBar, que é essa barra inferior.
+
+[07:46] Tab bar é essa barra de menus aqui embaixo. O que vamos fazer? Nós vamos criar um navigation controller aqui embaixo do tabBarController para então utilizarmos nesse método para chamar o view controller que nós precisamos. Então eu vou criar um let navigationController =, que é um = UINavigationController().
+
+[08:13] O (rootViewController: dele será o : tabBarController), que é a barra inferior com os os dois view controllers que nós temos. Nós precisamos ocultar o navigation bar, que é aquela barra que aparece em cima, eu vou até comentar essa parte do código só para buildar e te explicar.
+
+[08:42] Aqui nós vamos fazer o seguinte, o window?.rootViewController =, ele será o = navigationController. Vou rodar aqui. Quando fazemos isso, repare que aqui em cima ele ficou com essa barra superior.
+
+[09:00] Se eu clico no mapa, ele aparece essa barra em todos os controles, e eu não quero essa barra. Como eu faço para ocultar? Eu pego o navigationController.navigationBar.isHidden = true e passo como verdadeiro. Agora, se eu rodar o projeto, aquela barra não aparece mais lá.
+
+[09:25] Ele serve para isso. Já tenho o meu navigation controller, agora o que vamos fazer? Vamos voltar e vamos tratar esse switch que nós temos aqui. Primeiro, o que eu vou fazer? Eu preciso do navigation aqui, eu preciso recuperar o navigation. Eu vou fazer o seguinte, eu vou criar uma constante let navigationController = window.rootViewController. rootViewController nós já vimos o que é, é o navigation controller.
+
+[10:06] Então vamos fazer um casting para UINavigationController. Nós temos acesso aqui ao navigation. Depois disso, eu preciso ter acesso aos views controllers que nós temos no tab bar. Eu tenho a "Home" e tenho o "Recibo". Para eu não ter que instanciar de novo, para eu não ter que fazer isso let home = HomeViewController, aí eu instancio. Eu vou instanciar para que, se eu já tenho ele instanciado no meu aplicativo?
+
+[10:46] Então eu vou utilizar o controller que já está inicializado, por isso eu não vou fazer dessa forma. Como eu faço então? Eu vou fazer o seguinte, eu vou criar um if let tabBarController =, afinal o view controller é dentro do tab bar, = navigationController?.viewControllers. firts, que é uma lista de view controllers e eu vou pegar o primeiro.
+
+[11:15] E vou fazer o casting para UITabBarController. Se ele entrar aqui, significa que já temos o tab bar controller. O tab bar controller é esse componente inferior, que gerencia esses dois casos que nós temos aqui.
+
+[11:37] O que eu vou fazer agora? Eu vou pegar o tabBarController. e vou dar um pop to view controller. Na verdade, é o navigationController.popToRootViewController(animated: true) e eu passo aqui como true. Esse método, ele volta no view controller inicial que foi instanciado. Qual é o view controller inicial que nós temos aqui?
+
+[12:00] A "Home", então é isso o que eu estou fazendo aqui. Depois disso, eu tenho acesso então, de fato, ao primeiro view controller. Eu vou criar mais um if let, que é a home = tabBarController.viewControllers.first e eu vou fazer um casting para HomeViewController. Depois que eu voltei para o view controller inicial, que é a tela inicial do aplicativo.
+
+[12:33] Porque pode ser que eu venha aqui, clique em "Recibo" e deixo o app suspenso, então eu preciso voltar para esse primeiro view controller para conseguir abrir a câmera. Depois que eu fizer isso de fato, o que eu vou fazer? Eu pego o home.tentaAbrirCamera().
+
+[12:52] Esse é o trabalho que nós tivemos então para montar a lógica para abrir a câmera. Relembrando, eu não quis instanciar de novo os view controllers, porque nós já tínhamos eles inicializados, senão era muito simples eu instanciar a home, instanciar o recibo, mas não isso e nem é uma boa prática fazer isso. Nós já temos eles inicializados, por que vamos instanciar de novo?
+
+[13:20] Dessa forma nós reaproveitamos os controles que nós já inicializamos para conseguir fazer o que nós precisamos aqui que, no fundo, é abrir a câmera. Agora, o que eu vou fazer? Eu vou plugar no meu iPhone e vou testar no meu iPhone físico, no meu device físico, para tentar abrir a câmera através do shortcut, porque, relembrando, no simulador, nós não conseguimos realizar algumas funcionalidades.
+
+[13:48] Então eu vou fazer isso, eu vou conectar o meu iPhone e vamos testar. Eu já espelhei o meu iPhone no QuickTime, agora vamos fazer o teste. Eu vou voltar para a tela inicial e o que eu vou fazer aqui? Eu vou clicar e segurar e vou clicar em "Registrar ponto". Cliquei em "Registrar ponto", ele vai abrir a câmera. Então eu já posso registrar o ponto. Clico em "Usar foto" e nós temos aqui o registro. É dessa forma que trabalhamos com atalhos no iOS.
+
+@@03
+Configurando shortcuts
+
+Como vimos na aula, podemos utilizar o recurso de 3D Touch para melhorar a usabilidade do usuário, colocando as principais features da aplicação em forma de atalho quando pressionamos o ícone do app com um pouco mais de força.
+Em qual arquivo devemos implementar as chaves obrigatórias para habilitar esse recurso?
+
+As keys (chaves) obrigatórias devem ser implementadas no arquivo Main.storyboard.
+ 
+Alternativa correta
+As keys obrigatórias devem ser implementadas no arquivo AppDelegate.
+ 
+Alternativa correta
+As keys obrigatórias devem ser implementadas no primeiro ViewController instanciado pela aplicação.
+ 
+Alternativa correta
+As keys obrigatórias devem ser implementadas no arquivo Info.plist.
+ 
+Alternativa correta! Configuramos as opções do 3D Touch no arquivo Info.plist.
+
+@@04
+Faça como eu fiz: Configurando atalhos
+
+Quando pressionamos um atalho no ícone do app, esse atalho nos leva a uma funcionalidade específica. Como podemos configurá-la?
+
+Através do método performActionFor shortcutItem é que podemos configurar no SceneDelegate
+func windowScene(_ windowScene: UIWindowScene, performActionFor shortcutItem: UIApplicationShortcutItem, completionHandler: @escaping (Bool) -> Void) {
+
+}
+
+@@05
+Projeto final do curso
+
+Parabéns por chegar até aqui!
+Você pode visualizar o projeto no Github ou até mesmo realizar o download dos arquivos.
+
+https://github.com/alura-cursos/2316-alura-ponto-parte2
+
+https://github.com/alura-cursos/2316-alura-ponto-parte2/archive/97149295535d3a9a209cc77862873a3907abd7ba.zip
+
+@@06
+O que aprendemos?
+
+Nesta aula, aprendemos sobre:
+Quais são as keys obrigatórias e opcionais para a implementação do 3D Touch;
+Como é a implementação do 3D Touch.
+
+@@07
+Conclusão
+
+[00:00] Parabéns!! Estamos finalizando mais um curso da nossa série de frameworks nativos para iOS. A ideia agora é relembrarmos tudo o que aprendemos neste curso, quais foram os principais tópicos. A ideia inicial foi mostrar para você como persistimos dados de forma local, então nós aprendemos a salvar imagens utilizando o File Manager.
+[00:28] Então quando nós selecionamos uma imagem nós conseguimos persistir essa imagem no nosso aplicativo, sem ser utilizando o core data que foi uma das formas que nós aprendemos no curso anterior. Dessa vez eu quis mostrar para você como utilizamos o File Manager, que também é um recurso bem interessante.
+
+[00:52] Quando falamos sobre o File Manager nós também contextualizamos o uso do core data, que ele é muito mais performático e ele é muito mais seguro para trabalhar com a persistência de informações maiores, informações onde você vai precisar fazer consultas um pouco mais específica, então é melhor você trabalhar com o core data.
+
+[01:15] Porém, o File Manager é um recurso muito legal de se trabalhar quando precisamos persistir arbitrariamente algum arquivo, alguma foto, enfim, e assim nós utilizamos esse espaço no curso, essa oportunidade, para explorar um pouco mais sobre o uso do File Manager. Depois disso, nós aprendemos a utilizar a autenticação no local do iOS, que ela esse LocalAuthentication.
+
+[01:45] Também contextualizamos que em aplicativos como aplicativos bancários, ou apps em que você precisa de um nível de permissão um pouco maior para o usuário, esse recurso também é muito utilizado. No nosso caso, nós aproveitamos os nossos cards de recibos.
+
+[02:08] Nós temos esse botão deletar e nós aplicamos então essa funcionalidade justamente aqui, para o usuário conseguir apagar um recibo nós temos que autenticar e ver que é ele mesmo que está fazendo isso. Dessa forma conseguimos deixar um pouco mais seguras as configurações do nosso aplicativo.
+
+[02:26] Depois começamos a falar um pouco sobre localização. Nós aprendemos a trabalhar com a localização do usuário, que é um recurso muito utilizado em aplicativos de corrida, de transporte, esses mais famosos, aplicativos de paquera, onde passamos por determinado trajeto e conseguimos ver as pessoas que estão lá.
+
+[02:52] Tudo utilizando, na verdade, o GPS do iPhone, e que, no fundo, conseguimos trackear, desde que o usuário permita a localização dele. Então aprendemos a trabalhar com o core location, aprendemos a pedir a permissão do usuário para trackearmos a sua localização. A partir disso conseguimos obter a latitude e a longitude.
+
+[03:18] No nosso caso foi bem útil, porque passamos a salvar a localização do usuário quando batemos o ponto, então a empresa fictícia, que nós estamos trabalhando para desenvolver esse aplicativo, consegue ver aonde foi que o usuário bateu o ponto, qual foi a localização.
+
+[03:40] Depois disso, nós aprendemos um pouco também a mexer com o mapa do iOS. Criamos um controller específico para o mapa, para mostrar a localização do usuário. Aqui no simulador, nós não salvamos nenhuma localização, porque são batidas ponto antigas, mas conseguimos mostrar no mapa a região e o pino onde foi salvo esse ponto.
+
+[04:10] Por último, nós falamos um pouco também sobre os atalhos do iOS. Quando eu clico e seguro, eu tenho esse menu de quick actions, onde nós podemos agregar atalhos.
+
+[04:25] No nosso caso, nós conseguimos registrar um ponto sem estar com o app na tela do ponto ou sem inicializar o app. Dessa forma trabalhamos com o quick action, nós mexemos aqui no arquivo "Info.plist", configuramos algumas coisas.
+
+[04:42] E no SceneDelegate também nós implementamos a lógica para mostrar os shortcuts. Esse foi o conteúdo que nós vimos durante este curso. Ao final você será direcionado à página de avaliação deste curso. Eu queria primeiro te parabenizar por chegar até a etapa final e espero que este curso tenha agregado os seus conhecimentos.
+
+[05:08] Eu desejo que você continue praticando, que nós só conseguimos a excelência no nosso trabalho através de prática. Caso tenha uma aula que você tenha visto apenas uma vez, veja novamente.
+
+[05:22] O que eu sempre indico é: pegue algum aplicativo que você goste e tente reproduzir as coisas que nós aprendemos no curso em cima desse projeto que você vai criar, que de verdade você estará exercendo e praticando tudo o que vimos aqui. Mais uma vez obrigado e até o próximo curso.
