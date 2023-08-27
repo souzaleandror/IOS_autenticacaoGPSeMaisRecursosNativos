@@ -585,3 +585,162 @@ extension Localizacao: CLLocationManagerDelegate {
 O que aprendemos?
 
 Nessa aula, aprendemos como configurar o app para permitir que seja obtida a localização do usuário através da latitude e longitude.
+
+#### 27/08/2023
+
+@04-MapKit
+
+@@01
+Projeto da aula anterior
+
+Se você deseja começar o curso a partir desta aula, pode fazer o download do projeto desenvolvido até o momento.
+
+@@02
+Trabalhando com Map Kit
+
+[00:00] Terminamos a refatoração, extraímos do view controller para uma classe toda a lógica que nós precisamos, até o momento, para conseguir obter a latitude e a longitude do usuário. Agora vamos continuar com a criação do mapa, a ideia é nós implementarmos um mapa para mostrar a localização do usuário, então quando eu clicar em cima de um recibo, a ideia é abrir isso no mapa.
+[00:33] A última coisa que nós vamos mexer nesse método permissao, que nós não fizemos na última aula, é tratar esse caso. Se o usuário já autorizar, se ele autorizar sempre ou autorizar enquanto o app estiver em uso, vamos utilizar esse método startUpdatingLocation, que é exatamente para começar a trackear a localização dele.
+
+[00:58] Esse método vai disparar nesse didiUpdateLocations, que é um método de delegate e conseguimos então obter a localização do usuário. Então aqui nós temos o nosso gerenciadorDeLocalizacao, vamos dar um .startUpdatingLocation().
+
+[01:22] Feito isso, nós vamos voltar ao nosso projeto, nós já temos algumas features, algumas funcionalidades, como a "Home", o "Recibo", agora vamos criar então uma outra pasta. Aqui, na estrutura principal do projeto, na pasta "Alura Ponto", botão direito, novo grupo, e vamos chamar aqui de "Mapa".
+
+[01:47] Eu vou arrastar essa pasta "Mapa" para baixo da pasta "Recibo", tem que tomar cuidado para ele não entrar aqui, ela tem que ficar na mesma hierarquia de pastas. Na pasta "Mapa" eu vou criar mais duas pastas também, que vão, na verdade, nos ajudar a organizar o nosso projeto. Então botão direito, novo grupo, eu vou chamar de "View" e vou criar uma nova pasta, que eu vou chamar de "Controller".
+
+[02:19] Nós temos as pastas "View" e "Controller". A ideia é criarmos um novo view controller, nós vamos fazer isso agora, em cima da pasta "Mapa > Controller", botão direito, novo arquivo, e vamos selecionar "Cocoa Touch Class", "Next". Se no seu Xcode não estiver pré-selecionado a opção subclasse de "UIViewController", você busque e clique em cima de "UIViewController".
+
+[02:49] No meu caso já está. Eu vou dar então um nome para o arquivo, que se chamará "MapaViewController". Vamos manter essa opção para ele também criar uma view, que é o nosso XIB e eu vou dar um "Next" e um "Create". Só para manter a organização, ele cria tanto a view quanto o controller na mesma pasta, eu vou arrastar o meu XIB para dentro da pasta "View". Ficou assim.
+
+[03:24] Antes de mexermos na parte visual, eu vou abrir o "MapaViewController" e vamos fazer algumas implementações. Começando aqui, eu vou apagar esses comentários, que ele já traz por padrão, vou apagar também esse outro comentário.
+
+[03:41] Vamos criar um método para instanciar esse view controller. Como eu disse no início do vídeo, a ideia é que quando clicarmos em recibo, nós possamos abrir o mapa. Vamos criar um método para instanciar esse view controller. Eu vou criar uma class func, esse class significa que não precisamos instanciar o view controller para chamar o método.
+
+[04:08] E o nome do método será class func instanciar() -> {}. Aqui é importante recebermos por parâmetro o recibo. Por que o recibo? Porque, na verdade, é o recibo que tem a latitude e a longitude, que são duas informações importantíssimas para nós utilizarmos no mapa. Por isso vamos receber ( recibo: Recibo?) -> por parâmetro.
+
+[04:42] Eu vou receber um recibo opcional e eu vou devolver um -> MapaViewController {}. Aqui, qual é a ideia? Vamos criar um let controller =, que é um = MapaViewController() e vamos instanciar ele utilizando essa opção (nibName: " ", bundle: Bundle). nibName é o nome que nós demos para o nosso XIB, para o nosso XIB, que, coincidentemente, é o mesmo, "MapaViewController".
+
+[05:19] Eu vou copiar o nome e colar ele aqui, (nibName: "MapaViewController". o bundle nós vamos passar bundle: nil, porque ele está dentro do mesmo pacote que nós estamos trabalhando, por isso é nil.
+
+[05:33] Feito isso, já podemos dar um return controller. Mas o que vamos fazer com esse recibo que nós estamos recebendo por parâmetro? Nós vamos criar aqui uma variável dentro dessa classe, dentro desse view controller, para armazenar então o recibo. private var recibo:, que é do tipo : Recibo? opcional.
+
+[05:58] Aqui eu pego controller.recibo = recibo que estamos recebendo por parâmetro, = recibo. Então temos aqui, só para manter organizado, vou criar um // MARK: - Atributos, aqui é onde // MARK: - Instanciar e o viewDidLoad faz parte do ciclo de vida do nosso app, // MARK: - View life cycle, ou ciclo de vida. E aqui embaixo nós temos o // MARK: - Métodos, que nós vamos implementar.
+
+[06:44] Então já configuramos o nosso "MapaViewController", agora vamos voltar na "View" que nós temos aqui. Vamos colocar uma label, vou pegar uma label e vamos colocar um texto indicando o que esse mapa está nos mostrando. Vou colocar, por exemplo, "Localização da batida de ponto eletrônico".
+
+[07:23] Vou centralizar, eu vou alterar algumas configurações de estilo, eu vou alterar a fonte, clique no quadrado ao lado da fonte, vou em fonte customizada. Nós vamos utilizar aqui a fonte, deixa eu ver, pode ser essa "Devanagari", negrito, então "Bold" e tamanho eu vou setar aqui "20".
+
+[07:56] Vou deixar também em duas linhas. Em "Lines" eu vou colocar "2" e eu vou diminuir um pouco a largura e aumentar a altura para visualizarmos essa label em duas linhas. Vou centralizar. Agora precisamos adicionar algumas constraints.
+
+[08:16] Para começar, o que eu vou fazer? Eu vou abrir o painel de constraints, na barra inferior, vou setar uma constraint de largura, que é esse primeiro checkbox e vou colocar 15 de altura. Agora eu vou abrir esse outro painel e vou centralizar a minha label na horizontal.
+
+[08:38] E vou adicionar aqui. Então resolvemos todos os problemas das constraints. Agora sim, vamos utilizar o mapa. Eu vou buscar pelo mapa, map, na verdade. Vou clicar e vou arrastar para dentro da view e vou setar algumas constraints. Aqui nós colocamos uma altura de 15, então vou selecionar o mapa, vou colocar também uma altura de 15, para manter o padrão da label de cima.
+
+[09:08] Margem esquerda 0, margem direita 0 e margem inferior 0. Cliquei em adicionar. Já temos o nosso mapa.
+
+[09:22] Agora precisamos de fato chamar esse view controller. Eu vou no "ReciboViewContoller" e, para chamarmos esse mapa, nós precisamos implementar um método da UITableView, que é um método de delegate. Esse método se chama did select row.
+
+[09:47] Ou seja, quando selecionamos uma linha na table view, é disparado esse método. O que vamos fazer? Primeiro eu preciso ter acesso ao recibo, porque, no fim das contas, o que vamos fazer é isso, nós vamos instanciar o mapa, let mapaViewController =. Eu vou instanciar ele aqui, = MapaViewController.instanciar(recibo: Recibo).
+
+[10:10] Só que eu preciso passar, por parâmetro o recibo, então precisamos recuperar o recibo. let recibo = ao nosso = buscador.fetchedObjects?[], aqui vamos pegar no [indexPath.row], dessa forma temos acesso ao recibo.
+
+[10:31] Eu vou passar o = MapaViewController(recibo) por parâmetro, e agora precisamos chamar esse view controller. Na verdade, eu quero chamar ele como um modal, então não vou utilizar, por exemplo, navigationController.pushViewController. Eu quero que essa tela abra de baixo para cima e consigamos ver o mapa. Como eu faço isso?
+
+[10:54] Eu vou pegar o mapaViewController.modalPresentationStyle = e eu vou selecionar a opção = .automatic. Eu uso esse método present(), do próprio view controller e eu passo o (mapaViewController, animated: true, completion: nil), de forma animada.
+
+[11:17] Então agora vamos rodar o projeto, para testar toda essa implementação que nós fizemos, eu vou utilizar o simulador do iPhone 11 mesmo, não tem nenhum problema. Vou clicar em "Recibos" e vou selecionar, por exemplo, o primeiro. Olha que bacana.
+
+[11:34] Nós já estamos mostrando o mapa. Por enquanto não configuramos nenhuma localização para ele exibir, mas a ideia desse vídeo era construir esse modal para utilizarmos e, em seguida, conseguirmos mostrar a localização onde foi registrado o ponto. Para eu fechar esse modal eu clico nessa parte branca superior e arrasto para baixo. Dessa forma nós criamos o nosso modal com o mapa.
+
+@@03
+Colocando pinos no mapa
+
+[00:00] Com o "MapaViewController" criado, nós vamos continuar as implementações nele, o que precisamos fazer agora? Nós já estamos exibindo o mapa, porém ele não está mostrando nenhuma região específica, então não faz sentido ainda exibirmos o mapa.
+[00:20] A segunda coisa é exibir o pino no mapa onde a localização foi registrada, onde o usuário bateu e registrou o seu ponto. Então são duas coisas: mostrar a região e adicionar o pino, que é uma annotation no caso, no mapa. Vamos lá, para começar, aqui nós temos o nosso // MARK: - Métodos - só por curiosidade, todos esses marks que nós colocamos, se clicarmos em "MapaViewController", nós conseguimos encontrar as coisas mais fácil.
+
+[01:00] Por exemplo, eu sei que os métodos estão aqui, eu clico e ele já me traz para o método. Os atributos, eu clico e ele me traz para os atributos. Então se agruparmos toda as coisas dentro de classes, controllers, fica muito mais fácil de darmos manutenção e fácil de encontrar as coisas. Imagine que, por exemplo, eu declaro uma variável aqui, depois eu declaro outro aqui, outra aqui, então começa a ficar bagunçado o nosso view controller.
+
+[01:29] Eu, particularmente, gosto de separar e agrupar as coisas, assim nós conseguimos encontrar de uma forma mais simples. Vamos lá então, a primeira coisa que vamos fazer é criar um método chamado func setRegiao(), como nós estamos digitando aqui em português os métodos, e precisamos da latitude e da longitude.
+
+[01:54] Como o nosso recibo é opcional, nós vamos começar extraindo os valores dessa variável, então eu vou criar um guard let latitude = e eu pego o = recibo.latitude, e também eu vou aproveitar o mesmo guard let para longitude, então mais uma vez, , let longitude = recibo.longitude else. Se eu não conseguir, eu dou um return e já encerro o método.
+
+[02:33] Depois disso, vamos criar a região que nós vamos exibir no mapa. let regiao =, que é do tipo = MKCoordinate- aqui, no caso, nós precisamos importar o core location para trabalharmos com a API de localização e tudo mais. Porém, como precisaremos criar o outlet do mapa, e o mapa faz parte do map kit, eu vou importar o map kit, import MapKit.
+
+[03:07] Quando eu importo o map kit ele automaticamente também importa o core location. Então = MKCoordinateRegion() e eu vou instanciar ele passando aqui dois parâmetros. Basicamente primeiro é esse (center:, que é esse : CLLocationCoordinate2D(), então eu vou instanciá-lo e passo a latitude e a longitude.
+
+[03:35] A latitude nós já temos, que nós criamos um guard let para extrair esse valor, então vou passar a (latitude: latitude, longitude: longitude) e repare que nós precisamos de um span, que é esse span: MKCoordinateSpan. Nós vamos criar ele aqui em cima, let span = MKCoordinateSpan().
+
+[04:01] Aqui nós temos, na verdade, dois valores, que nós temos que passar, e eu vou explicar na prática esses valores, que é um pouco mais fácil. Mas, na verdade, isso é tipo o zoom que queremos que o mapa exiba em cima da localização. Eu vou deixar um valor bem pequeno, tipo (latitudeDelta: 0.01, longitudeDelta: 0.01). Quando rodarmos no simulador eu aumento esse valor para você ver para que esse parâmetro serve.
+
+[04:30] Com o span, eu vou passar ele por parâmetro, span: span. Então temos o span, temos a região, agora precisamos setar tudo isso no mapa. Para isso vamos criar o outlet do mapa, vou criar mais um //MARK: - IBOutlet. Eu vou abrir o nosso XIB, vou clicar em cima do mapa, vou em "Assistant".
+
+[05:03] Aqui eu vou segurar a tecla "Control" do teclado e vou arrastar para o código. Vou nomear aqui como "mapa" e vou dar um "Connect". Feito isso, agora podemos voltar novamente no view controller, já temos uma referência da nossa view do mapa dentro do nosso view controller. Com isso, o que eu vou fazer?
+
+[05:30] Eu vou pegar o mapa e eu vou dar um mapa.setRegion(). Eu vou passar a região que nós criamos, regiao, animated: true). O que eu vou fazer agora? Como nós já criamos esse método setRegiao, eu vou chamar ele no viewDidLoad, vou dar um setRegiao() e eu vou rodar o projeto para fazermos um teste.
+
+[06:00] Vou clicar aqui, vou subir o simulador. Como eu estou utilizando o simulador, vou clicar nesse ícone de localização, para utilizarmos uma região. Eu vou escolher, por exemplo, "Rio de Janeiro". Se bem que aqui nós já tínhamos cadastrado e salvo a latitude e a longitude. Cliquei no recibo, ele não marcou nenhuma região. Vamos ver o outro recibo.
+
+[06:43] Talvez quando salvamos esses recibos nós ainda não estávamos salvando a latitude e a longitude, então pode ser que não tenha valor. Quer ver? Deixa eu colocar um breakpoint, vou selecionar um recibo, deixa eu ver o valor da latitude e da longitude, po recibo.latitude, po recibo.longitude, é isso mesmo.
+
+[07:17] Os dois valores estão 0, por isso ele não está exibindo nenhuma região. Daqui a pouco então vou testar com o meu iPhone físico, e conseguimos ver a região certa. O próximo passo, depois que setamos a região, o que eu vou fazer? Eu vou colocar um pino no mapa, que aqui chamamos de annotation, e podemos customizar ela, por exemplo, trocando o ícone, trocando o título.
+
+[07:51] Mas, por default, por padrão, ele já vem com um balão e um alfinete. Nós vamos colocar essa marcação no mapa. Vamos lá, o que eu vou fazer aqui? Vou criar um novo método, vou chamar de func adicionarPino(). Aqui precisamos criar um annotation, eu vou chamar aqui de let annotation =, que é do tipo = MKPointAnnotation().
+
+[08:28] Podemos colocar um título, annotation.title =, eu vou colocar ="Registro de ponto". Agora podemos passar, por exemplo, as coordenadas para essa annotation, annotation.coordinate.latitude = recibo?.latitude ?? 0.0. Se vier nil nós podemos fazer uma verificação aqui e setar 0.
+
+[08:56] Aqui também annotation.coordintate.longitude = recibo.longitude 0.0. Se não houver valor nenhum, deixamos 0. Agora vamos adicionar essa annotation no mapa, eu vou chamar aqui o mapa.addAnnotation() e eu passo a (annotation) que nós criamos.
+
+[09:19] Agora, para testarmos de verdade, eu vou conectar o meu iPhone e vamos realizar esse teste. Já espelhei o meu iPhone aqui no QuickTime, eu vou clicar em "Registrar ponto", vou clicar em "Usar foto" e eu tenho um registro. Eu vou clicar nesse card e ele mostra a localização que eu estou.
+
+[09:51] Mas o pino do mapa ainda não apareceu. Nós precisamos chamar esse método também no viewDidLoad. Então adicionarPino(). Vou rodar mais uma vez. Eu já subi o simulador, vou clicar em "Recibo", clico em cima do registro e ele me mostra o ponto, o pino exatamente no local em que foi registrado o ponto.
+
+[10:19] Então é dessa forma que trabalhamos com essas annotations. Na verdade, é muito simples, nós colocamos um título, nós temos também as coordenadas e nós também podemos colocar um subtítulo, se quisermos. Posso vir aqui, annotation.subtitle= " " e também colocar um texto qualquer.
+
+[10:50] Tem outro ponto que eu queria mostrar aqui para você, que é: nós estamos trabalhando com a localização em cima da latitude e da longitude do usuário. Mas, no seu aplicativo, pode ser que você não tenha a latitude e a longitude, pode ser que você tenha que pedir para o usuário digitar uma localização, para ele pesquisar uma localização, e você descobre a latitude e longitude.
+
+[11:17] Então você pode colocar um search ou alguma coisa assim no seu app, o usuário digita o local e é feita uma requisição para buscar esse endereço. Eu vou mostrar como fazer isso, não é o nosso caso, porque nós precisamos da localização atual do usuário, mas pode ser que no seu caso você precise utilizar isso.
+
+[11:38] Aqui embaixo, só para fazermos esse teste, eu vou te mostrar. Nós temos um componente que se chama CL geo coder. Eu vou criar ele aqui, let geoCoder =, que é do tipo = CLGeocoder(). Podemos chamar ele e chamar esse método geoCoder.geocodeAddressString().
+
+[12:00] Aqui eu passo, por exemplo, uma localização ("Avenida Paulista". Pode ser que isso o usuário digite, que é mais comum o usuário digitar, você pega a string que você receber e coloca neste parâmetro. Ele vai trazer aqui alguns locais, então { locaisEncontrados, error, ou ele pode trazer um erro, e você faz uma verificação.
+
+[12:29] E como eu descubro a latitude e a longitude? Eu vou pegar a localização, que são esses locais encontrados, vou pegar o primeiro, let localizacao = locaisEncontrados?.first. Em cima dele eu vou criar a latitude, let latitude = localizacao?.location?.coordinate.latitude. A mesma coisa com a longitude, let longitude = localizacao?.location?.coordinate.longitude.
+
+[13:03] Essa é uma forma em que o usuário inputa a rua, o endereço, a cidade, e você descobre a latitude e a longitude. Só para ilustrar aqui, já que estamos falando sobre localização, como você faria se você quisesse pesquisar a localização que o usuário procura. Com isso nós falamos então sobre mapas, sobre localização e já estamos exibindo os registros de ponto no mapa.
+
+@@04
+Configurando o pino do mapa
+
+Quando trabalhamos com mapa, um recurso muito utilizado é o uso de uma View para marcar alguma referência, mais conhecida como Pino.
+Qual dessas classe utilizamos para adicionar um novo pino no mapa?
+
+CLLocationCoordinate2D.
+ 
+Alternativa correta
+MKCoordinateSpan.
+ 
+Alternativa correta
+MKPointAnnotation.
+ 
+Alternativa correta! Através dessa classe, conseguimos adicionar uma View (pino) no local configurado.
+
+@@05
+Faça como eu fiz: Utilizando Mapas
+
+O uso do MapKit nos permite utilizar vários recursos, dentre eles, o mapa, que utilizamos para exibir pontos importantes para o usuário.
+Como podemos configurar um pino no mapa?
+
+Para configurar um pino no mapa, usamos o seguinte código:
+func adicionarPino() {
+        let annotation = MKPointAnnotation()
+        annotation.title = "Registro de ponto"
+
+        annotation.coordinate.latitude = recibo?.latitude ?? 0.0
+        annotation.coordinate.longitude = recibo?.longitude ?? 0.0
+
+        mapa.addAnnotation(annotation)
+}
+
+@@06
+O que aprendemos?
+
+Nessa aula, aprendemos como implementar o mapa e também como configurá-lo para exibir pontos importantes para o usuário, através da classe MKPointAnnotation.
